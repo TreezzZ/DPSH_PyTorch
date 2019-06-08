@@ -32,7 +32,7 @@ class DLFHLoss(nn.Module):
         # 防止exp溢出
         theta = torch.clamp(theta, min=-100, max=50)
 
-        loss = torch.log(1 + torch.exp(theta)).sum() - (S * theta).sum()
+        loss = (torch.log(1 + torch.exp(theta)) - S * theta).sum()
 
         # 正则化项
         reg_term = (outputs.sign() - outputs).pow(2).sum()

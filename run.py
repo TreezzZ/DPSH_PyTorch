@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import DLFH
+import DPSH
 import data.dataloader as DataLoader
+import data.cifar10 as cifar10
 
 from loguru import logger
 
@@ -10,7 +11,7 @@ import argparse
 import torch
 
 
-def run_dlfh(opt):
+def run_dpsh(opt):
     """运行DLFH算法
 
     Parameters
@@ -18,8 +19,7 @@ def run_dlfh(opt):
         程序运行参数
 
     Returns
-        meanAP: float
-        Mean Average Precision
+        None
     """
     logger.info("hyper-parameters: code_length: {}, lr: {}, batch_size:{}, eta:{}"
                 .format(opt.code_length,
@@ -31,18 +31,38 @@ def run_dlfh(opt):
     onehot = False if opt.dataset == 'nus_wide' else True
 
     # 加载数据，pytorch版本的ciar10直接返回DataLoader类型，要分开对待，以后可能修改代码统一形式
-    train_dataloader, query_dataloader = DataLoader.load_data(path=opt.data_path,
-                                                              dataset=opt.dataset,
-                                                              num_workers=opt.num_workers,
-                                                              )
+    kwargs = {'num_workers': opt.num_workers,
+              'batch_size': opt.batch_size,
+              'num_train': 5000,
+              'num_query': 1000,
+              }
+    # init
+    cifar10.CIFAR10.init_load_data(opt.data_path,
+                                   kwargs['num_train'],
+                                   kwargs['num_query'],
+                                   )
+    train_dataloader = DataLoader.load_data(path=opt.data_path,
+                                            dataset=opt.dataset,
+                                            mode='train',
+                                            **kwargs,
+                                            )
+    query_dataloader = DataLoader.load_data(path=opt.data_path,
+                                            dataset=opt.dataset,
+                                            mode='query',
+                                            **kwargs,
+                                            )
+    database_dataloader = DataLoader.load_data(path=opt.data_path,
+                                               dataset=opt.dataset,
+                                               mode='all',
+                                               **kwargs,
+                                               )
 
     # DLFH算法
-    B, meanAP = DLFH.dlfh(opt,
-                          train_dataloader,
-                          query_dataloader,
-                          )
-
-    return meanAP
+    DPSH.dpsh(opt,
+              train_dataloader,
+              query_dataloader,
+              database_dataloader,
+              )
 
 
 def load_parse():
@@ -55,52 +75,37 @@ def load_parse():
         opt: parser
         程序参数
     """
-    parser = argparse.ArgumentParser(description='DLFH')
-    parser.add_argument('--dataset', default='cifar10_pytorch', type=str,
-                        help='dataset used to train (default: cifar10_pytorch)')
+    parser = argparse.ArgumentParser(description='DPSH_PyTorch')
+    parser.add_argument('--dataset', default='cifar10', type=str,
+                        help='dataset used to train (default: cifar10)')
     parser.add_argument('--data-path', default='/data3/zhaoshu/data/ImageRetrieval/cifar10.mat', type=str,
                         help='path of cifar10 dataset')
     parser.add_argument('--num-query', default='1000', type=int,
                         help='number of query(default: 1000)')
+    parser.add_argument('--num-train', default='5000', type=int,
+                        help='number of train(default: 5000)')
     parser.add_argument('--code-length', default='12', type=int,
                         help='hyper-parameter: binary hash code length (default: 12)')
 
     parser.add_argument('--model', default='alexnet', type=str,
-                        help='CNN model')
+                        help='CNN model(default: alexnet')
     parser.add_argument('--gpu', default='0', type=int,
                         help='use gpu(default: 0. -1: use cpu)')
     parser.add_argument('--lr', default='1e-3', type=float,
                         help='learning rate(default: 1e-3)')
-    parser.add_argument('--batch-size', default=64, type=int,
+    parser.add_argument('--batch-size', default='64', type=int,
                         help='batch size(default: 64)')
-    parser.add_argument('--epochs', default=50, type=int,
+    parser.add_argument('--epochs', default='50', type=int,
                         help='epochs(default:64)')
     parser.add_argument('--num-workers', default='4', type=int,
                         help='number of workers(default: 4)')
-    parser.add_argument('--eta', default=50, type=float,
+    parser.add_argument('--eta', default='50', type=float,
                         help='hyper-parameter: regularization term (default: 50)')
 
     return parser.parse_args()
 
 
-def setup_seed(seed):
-    """设置随机数种子
-
-    Parameters
-        seed: int
-        种子
-    """
-    import numpy as np
-    import random
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-
-
 if __name__ == "__main__":
-    setup_seed(8888)
     opt = load_parse()
     logger.add('logs/file_{time}.log')
 
@@ -109,14 +114,7 @@ if __name__ == "__main__":
     else:
         opt.device = torch.device("cuda:%d" % opt.gpu)
 
-    lrs = 1e-2
-    batch_sizes = 64
-    etas = 20
-
-    opt.lr = lrs
-    opt.batch_size = batch_sizes
-    opt.eta = etas
-    run_dlfh(opt)
+    run_dpsh(opt)
 
 
     # import random

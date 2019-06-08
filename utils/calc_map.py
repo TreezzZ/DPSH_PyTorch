@@ -4,10 +4,14 @@
 from utils.calc_hamming_dist import calc_hamming_dist
 
 import numpy as np
-from tqdm import tqdm
 
 
-def calc_map(query_code, database_code, query_labels, database_labels):
+def calc_map(query_code,
+             database_code,
+             query_labels,
+             database_labels,
+             enable_fast=True,
+             ):
     """计算mAP
 
     Parameters
@@ -23,6 +27,9 @@ def calc_map(query_code, database_code, query_labels, database_labels):
         database_labels: ndarray, {0, 1}^{n * n_classes}
         database的label，onehot编码
 
+        enable_fast: bool
+        是否启用加速
+
     Returns
         meanAP: float
         Mean Average Precision
@@ -31,32 +38,32 @@ def calc_map(query_code, database_code, query_labels, database_labels):
     mean_AP = 0.0
 
     # 内存够大使用下面的代码预计算可以加速
-    pre_calc_retrieval = (query_labels @ database_labels.T > 0).astype(np.float32)
-    pre_calc_retrieval_cnt = pre_calc_retrieval.sum(axis=1)
-    pre_calc_hamming_dist = 0.5 * (query_code.shape[1] - query_code @ database_code.T)
+    if enable_fast:
+        pre_calc_retrieval = (query_labels @ database_labels.T > 0).astype(np.float32)
+        pre_calc_retrieval_cnt = pre_calc_retrieval.sum(axis=1)
+        pre_calc_hamming_dist = 0.5 * (query_code.shape[1] - query_code @ database_code.T)
 
-    evaluate_tqdm = tqdm(range(num_query))
-    for i in evaluate_tqdm:
-        evaluate_tqdm.set_description("evaluate")
+    for i in range(num_query):
         # 加速
-        retrieval = pre_calc_retrieval[i, :]
-        retrieval_cnt = pre_calc_retrieval_cnt[i]
-        if retrieval_cnt == 0:
-            continue
-        hamming_dist = pre_calc_hamming_dist[i, :]
+        if enable_fast:
+            retrieval = pre_calc_retrieval[i, :]
+            retrieval_cnt = pre_calc_retrieval_cnt[i]
+            if retrieval_cnt == 0:
+                continue
+            hamming_dist = pre_calc_hamming_dist[i, :]
+        else:
+            # 检索
+            retrieval = (query_labels[i, :] @ database_labels.T > 0).astype(np.float32)
 
-        # 检索
-        # retrieval = (query_labels[i, :] @ database_labels.T > 0).astype(np.float32)
+            # 检索到数量
+            retrieval_cnt = retrieval.sum()
 
-        # 检索到数量
-        # retrieval_cnt = retrieval.sum()
+            # 未检索到
+            if retrieval_cnt == 0:
+                continue
 
-        # 未检索到
-        # if retrieval_cnt == 0:
-        #     continue
-
-        # hamming distance
-        # hamming_dist = calc_hamming_dist(query_code[i, :], database_code)
+            # hamming distance
+            hamming_dist = calc_hamming_dist(query_code[i, :], database_code)
 
         # 根据hamming distance安排检索结果位置
         retrieval = retrieval[np.argsort(hamming_dist)]

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-def cal_similarity_matrix(labels1, labels2, form='label'):
+def calc_similarity_matrix(labels1, labels2, form='label'):
     """计算similarity matrix
 
     Parameters

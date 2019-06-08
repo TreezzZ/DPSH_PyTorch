@@ -20,18 +20,21 @@ class Onehot(object):
         return target_onehot
 
 
-def encode_onehot(labels):
+def encode_onehot(labels, num_classes=10):
     """one-hot编码labels
 
     Parameters
         labels: ndarray
         标签
 
+        num_classes: int
+        类别数量
+
     Returns
         onehot_labels: ndarray
         onehot编码后的标签
     """
-    onehot_labels = np.zeros((len(labels), 10))
+    onehot_labels = np.zeros((len(labels), num_classes))
 
     for i in range(len(labels)):
         onehot_labels[i, labels[i]] = 1
