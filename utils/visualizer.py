@@ -16,13 +16,8 @@ class Visualizer(object):
     self.histogram(t.randn(1000))
     self.line(t.arange(0, 10),t.arange(1, 11))
     """
-    def __new__(cls, env='default'):
-        if not hasattr(cls, '_instance'):
-            cls._instance = super(Visualizer, cls).__new__(cls)
-        return cls._instance
-
     def __init__(self, env='default', **kwargs):
-        self.vis = visdom.Visdom(env=env, server='10.10.103.45', port=33675, **kwargs)
+        self.vis = visdom.Visdom(env=env, **kwargs)
 
         # 画的第几个数，相当于横坐标
         # 保存（’loss',23） 即loss的第23个点

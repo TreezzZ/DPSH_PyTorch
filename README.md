@@ -5,7 +5,7 @@
 ## Requirements
 1. pytorch 1.1
 2. visdom
-4. loguru
+3. loguru
 
 ## 运行
 `python run.py --dataset cifar10 --data-path <data_path> --code-length 64 `
@@ -18,9 +18,10 @@
 ```
 usage: run.py [-h] [--dataset DATASET] [--data-path DATA_PATH]
               [--num-query NUM_QUERY] [--num-train NUM_TRAIN]
-              [--code-length CODE_LENGTH] [--model MODEL] [--gpu GPU]
-              [--lr LR] [--batch-size BATCH_SIZE] [--epochs EPOCHS]
-              [--num-workers NUM_WORKERS] [--eta ETA]
+              [--code-length CODE_LENGTH] [--model MODEL] [--multi-gpu]
+              [--gpu GPU] [--lr LR] [--batch-size BATCH_SIZE]
+              [--epochs EPOCHS] [--num-workers NUM_WORKERS] [--eta ETA]
+              [--server SERVER] [--port PORT]
 
 DPSH_PyTorch
 
@@ -36,6 +37,7 @@ optional arguments:
   --code-length CODE_LENGTH
                         hyper-parameter: binary hash code length (default: 12)
   --model MODEL         CNN model(default: alexnet
+  --multi-gpu           use multiple gpu
   --gpu GPU             use gpu(default: 0. -1: use cpu)
   --lr LR               learning rate(default: 1e-3)
   --batch-size BATCH_SIZE
@@ -44,7 +46,13 @@ optional arguments:
   --num-workers NUM_WORKERS
                         number of workers(default: 4)
   --eta ETA             hyper-parameter: regularization term (default: 50)
+  --server SERVER       visdom server address
+  --port PORT           visdom server port
 
 ```
 
 ## 实验
+### CIFAR10
+![map](Figure_1.png)
+
+### NUS-WIDE

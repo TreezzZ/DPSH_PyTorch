@@ -5,7 +5,7 @@ import models.modelloader as modelloader
 import models.loss.dlfh_loss as dlfh_loss
 from utils.calc_map import calc_map
 from utils.calc_similarity_matrix import calc_similarity_matrix
-from utils.visualizer import Visualizer
+from visualizer import Visualizer
 from data.onehot import encode_onehot
 
 import torch
@@ -42,6 +42,8 @@ def dpsh(opt,
 
     # 定义网络,optimizer,loss
     model = modelloader.load_model(opt.model, num_classes=opt.code_length)
+    if opt.multi_gpu:
+        model = torch.nn.DataParallel(model)
     model.to(opt.device)
     criterion = dlfh_loss.DLFHLoss(opt.eta)
 
@@ -59,7 +61,7 @@ def dpsh(opt,
     U = torch.randn(N, opt.code_length).to(opt.device)
 
     # 算法开始
-    vis = Visualizer(env='DPSH_PyTorch')
+    vis = Visualizer(env='DPSH_PyTorch', server=opt.server, port=opt.port)
     best_map = 0.0
     last_model = None
     for epoch in range(opt.epochs):
@@ -97,9 +99,9 @@ def dpsh(opt,
             torch.save(model, os.path.join('result', last_model))
 
         # 可视化，日志
-        vis.plot('loss_{}_{}_{}'.format(opt.lr, opt.eta, opt.batch_size), total_loss)
-        vis.plot('map_{}_{}_{}'.format(opt.lr, opt.eta, opt.batch_size), meanAP)
-        logger.info('epoch: {}, loss: {:.4f}, map: {:.4f}'.format(epoch+1, total_loss, meanAP))
+        vis.plot('loss,code_length:{}'.format(opt.code_length), total_loss)
+        vis.plot('map,code_length:{}'.format(opt.code_length), meanAP)
+        logger.info('code_length: {}, epoch: {}, loss: {:.4f}, map: {:.4f}'.format(opt.code_length, epoch+1, total_loss, meanAP))
 
     # 加载性能最好模型，对整个数据集产生hash code进行evaluate
     model = torch.load(os.path.join('result', last_model))
@@ -112,7 +114,7 @@ def dpsh(opt,
                          opt,
                          True,
                          )
-    logger.info('final_map: {:.4f}'.format(final_map))
+    logger.info('code_length: {}, final_map: {:.4f}'.format(opt.code_length, final_map))
 
 
 def evaluate(model,
