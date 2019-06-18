@@ -4,8 +4,7 @@
 
 ## Requirements
 1. pytorch 1.1
-2. visdom
-3. loguru
+2. loguru
 
 ## 运行
 `python run.py --dataset cifar10 --data-path <data_path> --code-length 64 `
