@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import DPSH
-import data.dataloader as DataLoader
-import data.cifar10 as cifar10
-
-from loguru import logger
+import data.dataloader as dataloader
 
 import argparse
 import torch
+from loguru import logger
 
 
 def run_dpsh(opt):
@@ -23,39 +21,10 @@ def run_dpsh(opt):
     """
     onehot = False if opt.dataset == 'nus_wide' else True
 
-    # 加载数据，pytorch版本的ciar10直接返回DataLoader类型，要分开对待，以后可能修改代码统一形式
-    kwargs = {'num_workers': opt.num_workers,
-              'batch_size': opt.batch_size,
-              'num_train': 5000,
-              'num_query': 1000,
-              }
-    # init
-    cifar10.CIFAR10.init_load_data(opt.data_path,
-                                   kwargs['num_train'],
-                                   kwargs['num_query'],
-                                   )
-    train_dataloader = DataLoader.load_data(path=opt.data_path,
-                                            dataset=opt.dataset,
-                                            mode='train',
-                                            **kwargs,
-                                            )
-    query_dataloader = DataLoader.load_data(path=opt.data_path,
-                                            dataset=opt.dataset,
-                                            mode='query',
-                                            **kwargs,
-                                            )
-    database_dataloader = DataLoader.load_data(path=opt.data_path,
-                                               dataset=opt.dataset,
-                                               mode='all',
-                                               **kwargs,
-                                               )
+    # 加载数据
+    query_dataloader, train_dataloader, database_dataloader = dataloader.load_data(opt)
 
-    logger.info("hyper-parameters: code_length: {}, lr: {}, batch_size:{}, eta:{}"
-                .format(opt.code_length,
-                        opt.lr,
-                        opt.batch_size,
-                        opt.eta),
-                )
+    logger.info(opt)
 
     # DLFH算法
     DPSH.dpsh(opt,
@@ -117,25 +86,3 @@ if __name__ == "__main__":
         opt.device = torch.device("cuda:%d" % opt.gpu)
 
     run_dpsh(opt)
-
-
-    # import random
-    # used_value = set()
-    # for it in range(20):
-    #     lr = lrs[random.randint(0, len(lrs)-1)]
-    #     batch_size = batch_sizes[random.randint(0, len(batch_sizes)-1)]
-    #     eta = etas[random.randint(0, len(etas)-1)]
-    #
-    #     hyper_params = (lr, batch_size, eta)
-    #     if hyper_params in used_value:
-    #         continue
-    #     used_value.add(hyper_params)
-    #
-    #     opt.lr = lr
-    #     opt.batch_size = batch_size
-    #     opt.eta = eta
-    #
-    #     run_dlfh(opt)
-
-
-    # run_dlfh(opt)

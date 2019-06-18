@@ -5,7 +5,7 @@ import models.modelloader as modelloader
 import models.loss.dlfh_loss as dlfh_loss
 from utils.calc_map import calc_map
 from utils.calc_similarity_matrix import calc_similarity_matrix
-from data.onehot import encode_onehot
+from data.transform import encode_onehot
 
 import torch
 import torch.optim as optim
@@ -56,7 +56,7 @@ def dpsh(opt,
 
     # 初始化
     N = len(train_dataloader.dataset)
-    B = torch.randn(N, opt.code_length).sign().to(opt.device)
+    B = torch.randn(N, opt.code_length).to(opt.device)
     U = torch.randn(N, opt.code_length).to(opt.device)
 
     # 算法开始

@@ -1,32 +1,89 @@
 # -*- coding:utf-8 -*-
 
+from torch.utils.data import Dataset
+from torch.utils.data.dataloader import DataLoader
+from data.transform import img_transform
 
 import numpy as np
 import os
+from PIL import Image
 
 
-def load_data(path, train=True):
+def load_data(opt):
     """加载NUS-WIDE数据集
 
     Parameters
-        path: str
-        数据集路径
-
-        train: bool
-        True: 加载训练数据; False: 加载测试数据
+        opt:Parser
+        配置
 
     Returns
-        data: ndarray
-        数据
-
-        tags: ndarray
-        标签
+        query_dataloader, train_dataloader, database_dataloader: DataLoader
+        数据加载器
     """
-    if train:
-        data = np.load(os.path.join(path, 'nus_wide_train_data.npy'))
-        tags = np.load(os.path.join(path, 'nus_wide_train_tags.npy'))
-    else:
-        data = np.load(os.path.join(path, 'nus_wide_test_data.npy'))
-        tags = np.load(os.path.join(path, 'nus_wide_test_tags.npy'))
+    NUS_WIDE.init(opt.data_path, opt.num_query, opt.num_train)
+    query_dataset = NUS_WIDE('query', transform=img_transform())
+    train_dataset = NUS_WIDE('train', transform=img_transform())
+    database_dataset = NUS_WIDE('all', transform=img_transform())
 
-    return data, tags
+    query_dataloader = DataLoader(query_dataset,
+                                  batch_size=opt.batch_size,
+                                  num_workers=opt.num_workers,
+                                  )
+    train_dataloader = DataLoader(train_dataset,
+                                  batch_size=opt.batch_size,
+                                  num_workers=opt.num_workers,
+                                  )
+    database_dataloader = DataLoader(database_dataset,
+                                     batch_size=opt.batch_size,
+                                     num_workers=opt.num_workers,
+                                     )
+
+    return query_dataloader, train_dataloader, database_dataloader
+
+
+class NUS_WIDE(Dataset):
+    @staticmethod
+    def init(path, num_query, num_train):
+        # load data, tags
+        NUS_WIDE.ALL_IMG = np.load(os.path.join(path, 'nus-wide-21-img.npy'))
+        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tags.npy'))
+
+        # split data, tags
+        perm_index = np.random.permutation(NUS_WIDE.ALL_IMG.shape[0])
+        query_index = perm_index[:num_query]
+        train_index = perm_index[:num_train]
+
+        NUS_WIDE.QUERY_IMG = NUS_WIDE.ALL_IMG[query_index, :]
+        NUS_WIDE.QUERY_TAGS = NUS_WIDE.ALL_TAGS[query_index, :]
+        NUS_WIDE.TRAIN_IMG = NUS_WIDE.ALL_IMG[train_index, :]
+        NUS_WIDE.TRAIN_TAGS = NUS_WIDE.ALL_TAGS[train_index, :]
+
+    def __init__(self, mode, transform=None, targets_transform=None):
+        self.transform = transform
+        self.targets_transform = targets_transform
+
+        if mode == 'train':
+            self.img = NUS_WIDE.TRAIN_IMG
+            self.tags = NUS_WIDE.TRAIN_TAGS
+        elif mode == 'query':
+            self.img = NUS_WIDE.QUERY_IMG
+            self.tags = NUS_WIDE.QUERY_TAGS
+        else:
+            self.img = NUS_WIDE.ALL_IMG
+            self.tags = NUS_WIDE.ALL_TAGS
+
+    def __getitem__(self, index):
+        img, target = self.img[index], self.targets[index]
+
+        img = Image.fromarray(img)
+
+        if self.transform is not None:
+            img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return img, target, index
+
+    def __len__(self):
+        return self.img.shape[0]

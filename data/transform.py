@@ -4,6 +4,7 @@
 
 import torch
 import numpy as np
+import torchvision.transforms as transforms
 
 
 class Onehot(object):
@@ -42,9 +43,34 @@ def encode_onehot(labels, num_classes=10):
     return onehot_labels
 
 
-if __name__ == "__main__":
-    t = Onehot()
-    sample = 2
+def img_transform():
+    """返回transform
 
-    print(t(sample))
+    Returns:
+        transform: transforms
+        图像变换
+    """
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(227),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
 
+    return transform
+
+
+def normalization(data):
+    """归一化数据 (data - mean) / std
+
+    Parameters
+        data: ndarray
+        数据
+
+    Returns
+        normalized_data: ndarray
+        归一化后数据
+    """
+    if data.dtype != np.float:
+        data = data.astype(np.float)
+    return (data - data.mean()) / data.std()

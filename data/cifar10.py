@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from data.transform import img_transform
+from data.transform import Onehot
+
 import numpy as np
 import scipy.io as sio
 import torch.utils.data as data
 from PIL import Image
+from torch.utils.data.dataloader import DataLoader
+
 
 import os
 import sys
@@ -39,21 +44,42 @@ def load_data_gist(path, train=True):
     return data, labels
 
 
+def load_data(opt):
+    """加载cifar10数据
+
+    Parameters
+        opt: Parser
+        配置
+
+    Returns
+        query_dataloader, train_dataloader, database_dataloader: DataLoader
+        数据加载器
+    """
+    CIFAR10.init(opt.data_path, opt.num_query, opt.num_train)
+    query_dataset = CIFAR10('query', transform=img_transform(), target_transform=Onehot())
+    train_dataset = CIFAR10('train', transform=img_transform(), target_transform=Onehot())
+    database_dataset = CIFAR10('database', transform=img_transform(), target_transform=Onehot())
+
+    query_dataloader = DataLoader(query_dataset,
+                                  batch_size=opt.batch_size,
+                                  num_workers=opt.num_workers,
+                                  )
+    train_dataloader = DataLoader(train_dataset,
+                                  batch_size=opt.batch_size,
+                                  num_workers=opt.num_workers,
+                                  )
+    database_dataloader = DataLoader(database_dataset,
+                                     batch_size=opt.batch_size,
+                                     num_workers=opt.num_workers,
+                                     )
+
+    return query_dataloader, train_dataloader, database_dataloader
+
+
 class CIFAR10(data.Dataset):
     """加载官网下载的CIFAR10数据集"""
-    data = []
-    targets = []
-    query_data = []
-    query_targets = []
-    train_data = []
-    train_targets = []
-    all_data = []
-    all_targets = []
-
     @staticmethod
-    def init_load_data(root,
-                       num_train=5000, num_query=1000,
-                       ):
+    def init(root, num_query, num_train):
         data_list = ['data_batch_1',
                      'data_batch_2',
                      'data_batch_3',
@@ -63,6 +89,9 @@ class CIFAR10(data.Dataset):
                      ]
         base_folder = 'cifar-10-batches-py'
 
+        data = []
+        targets = []
+
         for file_name in data_list:
             file_path = os.path.join(root, base_folder, file_name)
             with open(file_path, 'rb') as f:
@@ -70,65 +99,44 @@ class CIFAR10(data.Dataset):
                     entry = pickle.load(f)
                 else:
                     entry = pickle.load(f, encoding='latin1')
-                CIFAR10.data.append(entry['data'])
+                data.append(entry['data'])
                 if 'labels' in entry:
-                    CIFAR10.targets.extend(entry['labels'])
+                    targets.extend(entry['labels'])
                 else:
-                    CIFAR10.targets.extend(entry['fine_labels'])
+                    targets.extend(entry['fine_labels'])
 
-        CIFAR10.data = np.vstack(CIFAR10.data).reshape(-1, 3, 32, 32)
-        CIFAR10.data = CIFAR10.data.transpose((0, 2, 3, 1))  # convert to HWC
-        CIFAR10.targets = np.array(CIFAR10.targets)
+        data = np.vstack(data).reshape(-1, 3, 32, 32)
+        data = data.transpose((0, 2, 3, 1))  # convert to HWC
+        targets = np.array(targets)
 
-        # 类别平衡划分
-        # 按类别排序，聚集在一起
-        sort_index = CIFAR10.targets.argsort()
-        CIFAR10.data = CIFAR10.data[sort_index, :]
-        CIFAR10.targets = CIFAR10.targets[sort_index]
+        CIFAR10.ALL_IMG = data
+        CIFAR10.ALL_TARGETS = targets
 
-        query_index = np.random.permutation(6000)[0:num_query//10]
-        for i in range(1, 10):
-            query_index = np.concatenate((query_index, np.random.permutation(6000)[0:num_query//10] + i * 6000))
+        # split data, tags
+        perm_index = np.random.permutation(CIFAR10.ALL_IMG.shape[0])
+        query_index = perm_index[:num_query]
+        train_index = perm_index[:num_train]
 
-        rest_index = set(range(60000)) - set(query_index)
-        rest_index = np.array(list(rest_index))
-
-        rest_index.sort()
-
-        train_index = np.random.permutation(5900)[0:num_train//10]
-        for i in range(1, 10):
-            train_index = np.concatenate((train_index, np.random.permutation(5900)[0:num_train//10] + i * 5900))
-        train_index = rest_index[train_index]
-
-        # perm_index = np.random.permutation(CIFAR10.data.shape[0])
-        # query_index = perm_index[:num_query]
-        # train_index = perm_index[num_query: num_query + num_train]
-
-        CIFAR10.query_data = CIFAR10.data[query_index, :]
-        CIFAR10.query_targets = CIFAR10.targets[query_index]
-
-        CIFAR10.train_data = CIFAR10.data[train_index, :]
-        CIFAR10.train_targets = CIFAR10.targets[train_index]
-
-        CIFAR10.all_data = CIFAR10.data
-        CIFAR10.all_targets = CIFAR10.targets
+        CIFAR10.QUERY_IMG = CIFAR10.ALL_IMG[query_index, :]
+        CIFAR10.QUERY_TARGETS = CIFAR10.ALL_TARGETS[query_index]
+        CIFAR10.TRAIN_IMG = CIFAR10.ALL_IMG[train_index, :]
+        CIFAR10.TRAIN_TARGETS = CIFAR10.ALL_TARGETS[train_index]
 
     def __init__(self, mode='train',
                  transform=None, target_transform=None,
                  ):
-        self.mode = mode
         self.transform = transform
         self.target_transform = target_transform
 
         if mode == 'train':
-            self.data = self.train_data
-            self.targets = self.train_targets
+            self.img = CIFAR10.TRAIN_IMG
+            self.targets = CIFAR10.TRAIN_TARGETS
         elif mode == 'query':
-            self.data = self.query_data
-            self.targets = self.query_targets
-        elif mode == 'all':
-            self.data = self.all_data
-            self.targets = self.all_targets
+            self.img = CIFAR10.QUERY_IMG
+            self.targets = CIFAR10.QUERY_TARGETS
+        else:
+            self.img = CIFAR10.ALL_IMG
+            self.targets = CIFAR10.ALL_TARGETS
 
     def __getitem__(self, index):
         """
@@ -138,7 +146,7 @@ class CIFAR10(data.Dataset):
         Returns:
             tuple: (image, target, index) where target is index of the target class.
         """
-        img, target = self.data[index], self.targets[index]
+        img, target = self.img[index], self.targets[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
@@ -153,4 +161,4 @@ class CIFAR10(data.Dataset):
         return img, target, index
 
     def __len__(self):
-        return len(self.data)
+        return len(self.img)
