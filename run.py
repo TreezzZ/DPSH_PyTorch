@@ -21,8 +21,6 @@ def run_dpsh(opt):
     Returns
         None
     """
-
-
     onehot = False if opt.dataset == 'nus_wide' else True
 
     # 加载数据，pytorch版本的ciar10直接返回DataLoader类型，要分开对待，以后可能修改代码统一形式
@@ -52,21 +50,19 @@ def run_dpsh(opt):
                                                **kwargs,
                                                )
 
-    for code_length in [24, 32, 48]:
-        opt.code_length = code_length
+    logger.info("hyper-parameters: code_length: {}, lr: {}, batch_size:{}, eta:{}"
+                .format(opt.code_length,
+                        opt.lr,
+                        opt.batch_size,
+                        opt.eta),
+                )
 
-        logger.info("hyper-parameters: code_length: {}, lr: {}, batch_size:{}, eta:{}"
-                    .format(opt.code_length,
-                            opt.lr,
-                            opt.batch_size,
-                            opt.eta),
-                    )
-        # DLFH算法
-        DPSH.dpsh(opt,
-                  train_dataloader,
-                  query_dataloader,
-                  database_dataloader,
-                  )
+    # DLFH算法
+    DPSH.dpsh(opt,
+              train_dataloader,
+              query_dataloader,
+              database_dataloader,
+              )
 
 
 def load_parse():
@@ -107,11 +103,6 @@ def load_parse():
                         help='number of workers(default: 4)')
     parser.add_argument('--eta', default='50', type=float,
                         help='hyper-parameter: regularization term (default: 50)')
-
-    parser.add_argument('--server', default='127.0.0.1', type=str,
-                        help='visdom server address')
-    parser.add_argument('--port', default=8888, type=int,
-                        help='visdom server port')
 
     return parser.parse_args()
 
