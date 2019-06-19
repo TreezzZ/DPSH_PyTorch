@@ -64,7 +64,7 @@ def load_parse():
                         help='use multiple gpu')
     parser.add_argument('--gpu', default=0, type=int,
                         help='use gpu(default: 0. -1: use cpu)')
-    parser.add_argument('--lr', default=1e-3, type=float,
+    parser.add_argument('--lr', default=1e-5, type=float,
                         help='learning rate(default: 1e-3)')
     parser.add_argument('--batch-size', default=64, type=int,
                         help='batch size(default: 64)')

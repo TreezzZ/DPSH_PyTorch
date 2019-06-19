@@ -46,7 +46,8 @@ class NUS_WIDE(Dataset):
     def init(path, num_query, num_train):
         # load data, tags
         NUS_WIDE.ALL_IMG = np.load(os.path.join(path, 'nus-wide-21-img.npy'))
-        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tag.npy'))
+        NUS_WIDE.ALL_IMG = NUS_WIDE.ALL_IMG.transpose((0, 2, 3, 1))
+        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tag.npy')).astype(np.float32)
 
         # split data, tags
         perm_index = np.random.permutation(NUS_WIDE.ALL_IMG.shape[0])
@@ -58,9 +59,9 @@ class NUS_WIDE(Dataset):
         NUS_WIDE.TRAIN_IMG = NUS_WIDE.ALL_IMG[train_index, :]
         NUS_WIDE.TRAIN_TAGS = NUS_WIDE.ALL_TAGS[train_index, :]
 
-    def __init__(self, mode, transform=None, targets_transform=None):
+    def __init__(self, mode, transform=None, target_transform=None):
         self.transform = transform
-        self.targets_transform = targets_transform
+        self.target_transform = target_transform
 
         if mode == 'train':
             self.img = NUS_WIDE.TRAIN_IMG
@@ -73,7 +74,7 @@ class NUS_WIDE(Dataset):
             self.tags = NUS_WIDE.ALL_TAGS
 
     def __getitem__(self, index):
-        img, target = self.img[index], self.targets[index]
+        img, tags = self.img[index], self.tags[index]
 
         img = Image.fromarray(img)
 
@@ -81,9 +82,9 @@ class NUS_WIDE(Dataset):
             img = self.transform(img)
 
         if self.target_transform is not None:
-            target = self.target_transform(target)
+            tags = self.target_transform(tags)
 
-        return img, target, index
+        return img, tags, index
 
     def __len__(self):
         return self.img.shape[0]
