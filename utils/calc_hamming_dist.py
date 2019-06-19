@@ -13,4 +13,4 @@ def calc_hamming_dist(B1, B2):
         dist: Tensor
         hamming distance
     """
-    return 0.5 * (B2.shape[1] - B1 @ B2.T)
+    return 0.5 * (B2.shape[1] - B1 @ B2.t())

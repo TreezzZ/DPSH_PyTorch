@@ -46,7 +46,7 @@ class NUS_WIDE(Dataset):
     def init(path, num_query, num_train):
         # load data, tags
         NUS_WIDE.ALL_IMG = np.load(os.path.join(path, 'nus-wide-21-img.npy'))
-        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tags.npy'))
+        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tag.npy'))
 
         # split data, tags
         perm_index = np.random.permutation(NUS_WIDE.ALL_IMG.shape[0])

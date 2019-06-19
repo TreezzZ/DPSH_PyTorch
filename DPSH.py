@@ -4,7 +4,6 @@
 import models.modelloader as modelloader
 import models.loss.dlfh_loss as dlfh_loss
 from utils.calc_map import calc_map
-from utils.calc_similarity_matrix import calc_similarity_matrix
 from data.transform import encode_onehot
 
 import torch
@@ -37,7 +36,10 @@ def dpsh(opt,
         None
     """
     # 标签onehot处理
-    train_labels = torch.FloatTensor(encode_onehot(train_dataloader.dataset.targets)).to(opt.device)
+    if opt.dataset == 'cifar10':
+        train_labels = torch.FloatTensor(encode_onehot(train_dataloader.dataset.targets)).to(opt.device)
+    elif opt.dataset == 'nus-wide':
+        train_labels = torch.FLoatTensor(train_dataloader.dataset.tags).to(opt.device)
 
     # 定义网络,optimizer,loss
     model = modelloader.load_model(opt.model, num_classes=opt.code_length)
@@ -56,8 +58,8 @@ def dpsh(opt,
 
     # 初始化
     N = len(train_dataloader.dataset)
-    B = torch.randn(N, opt.code_length).to(opt.device)
-    U = torch.randn(N, opt.code_length).to(opt.device)
+    B = torch.zeros(N, opt.code_length).to(opt.device)
+    U = torch.zeros(N, opt.code_length).to(opt.device)
 
     # 算法开始
     best_map = 0.0
@@ -73,7 +75,7 @@ def dpsh(opt,
 
             optimizer.zero_grad()
 
-            S = calc_similarity_matrix(labels, train_labels)
+            S = (labels @ train_labels.t() > 0).float()
             outputs = model(data)
 
             U[index, :] = outputs.data
@@ -86,28 +88,31 @@ def dpsh(opt,
 
             total_loss += loss.item()
 
-        meanAP = evaluate(model, query_dataloader, train_labels, B, opt)
+        if epoch % opt.evaluate_freq == opt.evaluate_freq - 1:
+            meanAP = evaluate(model, query_dataloader, train_labels, B, opt)
 
-        # 保存当前最好结果
-        if best_map < meanAP:
-            if last_model:
-                os.remove(os.path.join('result', last_model))
-            best_map = meanAP
-            last_model = 'model_{:.4f}.t'.format(best_map)
-            torch.save(model, os.path.join('result', last_model))
+            # 保存当前最好结果
+            if best_map < meanAP:
+                if last_model:
+                    os.remove(os.path.join('result', last_model))
+                best_map = meanAP
+                last_model = 'model_{:.4f}.t'.format(best_map)
+                torch.save(model, os.path.join('result', last_model))
 
-        logger.info('code_length: {}, epoch: {}, loss: {:.4f}, map: {:.4f}'.format(opt.code_length, epoch+1, total_loss, meanAP))
+            logger.info('code_length: {}, epoch: {}, loss: {:.4f}, map: {:.4f}'.format(opt.code_length, epoch+1, total_loss, meanAP))
 
     # 加载性能最好模型，对整个数据集产生hash code进行evaluate
     model = torch.load(os.path.join('result', last_model))
-    database_code = generate_code(model, database_dataloader, opt)
-    database_labels = torch.FloatTensor(encode_onehot(database_dataloader.dataset.targets))
+    database_code = generate_code(model, database_dataloader, opt).to(opt.device)
+    if opt.dataset == 'cifar10':
+        database_labels = torch.FloatTensor(encode_onehot(database_dataloader.dataset.targets)).to(opt.device)
+    elif opt.dataset == 'nus-wide':
+        database_labels = torch.FloatTensor(database_dataloader.dataset.tags).to(opt.device)
     final_map = evaluate(model,
                          query_dataloader,
                          database_labels,
                          database_code,
                          opt,
-                         True,
                          )
     logger.info('code_length: {}, final_map: {:.4f}'.format(opt.code_length, final_map))
 
@@ -117,7 +122,6 @@ def evaluate(model,
              train_labels,
              B,
              opt,
-             enable_fast=True,
              ):
     """评估算法
 
@@ -134,11 +138,11 @@ def evaluate(model,
         B: ndarray
         学到的hash code
 
+        topk: int
+        计算前topk个map
+
         opt: Parser
         参数
-
-        enable_fast: bool
-        是否启用加速
 
     Returns
         meanAP: float
@@ -146,17 +150,21 @@ def evaluate(model,
     """
     model.eval()
     # CNN作为out-of-sampling extension
-    query_code = generate_code(model, query_dataloader, opt)
+    query_code = generate_code(model, query_dataloader, opt).to(opt.device)
 
     # query labels
-    query_labels = encode_onehot(query_dataloader.dataset.targets)
+    if opt.dataset == 'cifar10':
+        query_labels = torch.FloatTensor(encode_onehot(query_dataloader.dataset.targets)).to(opt.device)
+    elif opt.dataset == 'nus-wide':
+        query_labels = torch.FloatTensor(query_dataloader.dataset.tags).to(opt.device)
 
     # 计算map
-    meanAP = calc_map(query_code.cpu().numpy(),
-                      B.cpu().detach().numpy(),
+    meanAP = calc_map(query_code,
+                      B,
                       query_labels,
-                      train_labels.cpu().numpy(),
-                      enable_fast,
+                      train_labels,
+                      opt.device,
+                      opt.topk,
                       )
     model.train()
 
