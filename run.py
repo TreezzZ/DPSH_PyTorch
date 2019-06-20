@@ -82,6 +82,12 @@ if __name__ == "__main__":
     opt = load_parse()
     logger.add('logs/file_{time}.log')
 
+    import random
+    import torch.backends.cudnn as cudnn
+    random.seed(20180707)
+    torch.manual_seed(20180707)
+    cudnn.deterministic = True
+
     if opt.gpu == -1:
         opt.device = torch.device("cpu")
     else:

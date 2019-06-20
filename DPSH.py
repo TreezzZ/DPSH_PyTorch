@@ -76,10 +76,13 @@ def dpsh(opt,
             optimizer.zero_grad()
 
             S = (labels @ train_labels.t() > 0).float()
+
             outputs = model(data)
 
             U[index, :] = outputs.data
             B[index, :] = outputs.clone().sign()
+
+            U = U.sign()
 
             loss = criterion(S, outputs, U)
             loss.backward()
