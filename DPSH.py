@@ -39,7 +39,7 @@ def dpsh(opt,
     if opt.dataset == 'cifar10':
         train_labels = torch.FloatTensor(encode_onehot(train_dataloader.dataset.targets)).to(opt.device)
     elif opt.dataset == 'nus-wide':
-        train_labels = torch.FloatTensor(train_dataloader.dataset.tags).to(opt.device)
+        train_labels = torch.FLoatTensor(train_dataloader.dataset.tags).to(opt.device)
 
     # 定义网络,optimizer,loss
     model = modelloader.load_model(opt.model, num_classes=opt.code_length)
