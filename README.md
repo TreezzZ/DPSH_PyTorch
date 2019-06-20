@@ -39,12 +39,12 @@ optional arguments:
   --model MODEL         CNN model(default: alexnet)
   --multi-gpu           use multiple gpu
   --gpu GPU             use gpu(default: 0. -1: use cpu)
-  --lr LR               learning rate(default: 1e-3)
+  --lr LR               learning rate(default: 1e-5)
   --batch-size BATCH_SIZE
                         batch size(default: 64)
   --epochs EPOCHS       epochs(default:64)
   --num-workers NUM_WORKERS
                         number of workers(default: 4)
-  --eta ETA             hyper-parameter: regularization term (default: 50)
+  --eta ETA             hyper-parameter: regularization term (default: 10)
 
 ```
