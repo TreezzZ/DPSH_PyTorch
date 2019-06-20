@@ -8,7 +8,8 @@
 
 ## 数据集下载
 1. [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html)
-2. [NUS-WIDE]()
+2. [NUS-WIDE](https://pan.baidu.com/s/1S1ZsYCEfbH5eQguHs8yG_w)
+密码：4839
 
 ## 运行
 `python run.py --dataset cifar10 --data-path <data_path> --code-length 64 `

@@ -82,8 +82,6 @@ def dpsh(opt,
             U[index, :] = outputs.data
             B[index, :] = outputs.clone().sign()
 
-            U = U.sign()
-
             loss = criterion(S, outputs, U)
             loss.backward()
 

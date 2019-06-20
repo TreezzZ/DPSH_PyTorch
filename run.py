@@ -78,15 +78,19 @@ def load_parse():
     return parser.parse_args()
 
 
+def set_seed(seed):
+    import random
+    import torch.backends.cudnn as cudnn
+    random.seed(seed)
+    torch.manual_seed(seed)
+    cudnn.deterministic = True
+
+
 if __name__ == "__main__":
     opt = load_parse()
     logger.add('logs/file_{time}.log')
 
-    import random
-    import torch.backends.cudnn as cudnn
-    random.seed(20180707)
-    torch.manual_seed(20180707)
-    cudnn.deterministic = True
+    # set_seed(20180707)
 
     if opt.gpu == -1:
         opt.device = torch.device("cpu")
