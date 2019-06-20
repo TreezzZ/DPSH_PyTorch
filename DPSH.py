@@ -139,9 +139,6 @@ def evaluate(model,
         B: ndarray
         学到的hash code
 
-        topk: int
-        计算前topk个map
-
         opt: Parser
         参数
 

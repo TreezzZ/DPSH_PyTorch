@@ -72,8 +72,8 @@ def load_parse():
                         help='epochs(default:64)')
     parser.add_argument('--num-workers', default=4, type=int,
                         help='number of workers(default: 4)')
-    parser.add_argument('--eta', default=50, type=float,
-                        help='hyper-parameter: regularization term (default: 50)')
+    parser.add_argument('--eta', default=10, type=float,
+                        help='hyper-parameter: regularization term (default: 10)')
 
     return parser.parse_args()
 
