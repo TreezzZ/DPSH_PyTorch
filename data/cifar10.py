@@ -65,6 +65,7 @@ def load_data(opt):
                                   num_workers=opt.num_workers,
                                   )
     train_dataloader = DataLoader(train_dataset,
+                                  shuffle=True,
                                   batch_size=opt.batch_size,
                                   num_workers=opt.num_workers,
                                   )
@@ -112,11 +113,28 @@ class CIFAR10(data.Dataset):
         CIFAR10.ALL_IMG = data
         CIFAR10.ALL_TARGETS = targets
 
-        # split data, tags
-        perm_index = np.random.permutation(CIFAR10.ALL_IMG.shape[0])
-        query_index = perm_index[:num_query]
-        train_index = perm_index[:num_train]
+        # sort by class
+        sort_index = CIFAR10.ALL_TARGETS.argsort()
+        CIFAR10.ALL_IMG = CIFAR10.ALL_IMG[sort_index, :]
+        CIFAR10.ALL_TARGETS = CIFAR10.ALL_TARGETS[sort_index]
 
+        # (num_query / number of class) query images per class
+        # (num_train / number of class) train images per class
+        query_per_class = num_query // 10
+        train_per_class = num_train // 10
+
+        # permutate index (range 0 - 6000 per class)
+        perm_index = np.random.permutation(CIFAR10.ALL_IMG.shape[0] // 10)
+        query_index = perm_index[:query_per_class]
+        train_index = perm_index[query_per_class: query_per_class + train_per_class]
+
+        query_index = np.tile(query_index, 10)
+        train_index = np.tile(train_index, 10)
+        inc_index = np.array([i * (CIFAR10.ALL_IMG.shape[0] // 10) for i in range(10)])
+        query_index = query_index + inc_index.repeat(query_per_class)
+        train_index = train_index + inc_index.repeat(train_per_class)
+
+        # split data, tags
         CIFAR10.QUERY_IMG = CIFAR10.ALL_IMG[query_index, :]
         CIFAR10.QUERY_TARGETS = CIFAR10.ALL_TARGETS[query_index]
         CIFAR10.TRAIN_IMG = CIFAR10.ALL_IMG[train_index, :]
