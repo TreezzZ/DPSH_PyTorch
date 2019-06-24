@@ -4,9 +4,9 @@ import torch.nn as nn
 import torch
 
 
-class DLFHLoss(nn.Module):
+class DPSHLoss(nn.Module):
     def __init__(self, eta):
-        super(DLFHLoss, self).__init__()
+        super(DPSHLoss, self).__init__()
         self.eta = eta
 
     def forward(self, S, outputs, U):

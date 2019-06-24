@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import models.modelloader as modelloader
-import models.loss.dlfh_loss as dlfh_loss
+import models.loss.dpsh_loss as dlfh_loss
 from utils.calc_map import calc_map
 from data.transform import encode_onehot
 
@@ -39,14 +39,14 @@ def dpsh(opt,
     if opt.dataset == 'cifar10':
         train_labels = torch.FloatTensor(encode_onehot(train_dataloader.dataset.targets)).to(opt.device)
     elif opt.dataset == 'nus-wide':
-        train_labels = torch.FLoatTensor(train_dataloader.dataset.tags).to(opt.device)
+        train_labels = torch.FloatTensor(train_dataloader.dataset.targets).to(opt.device)
 
     # 定义网络,optimizer,loss
     model = modelloader.load_model(opt.model, num_classes=opt.code_length)
     if opt.multi_gpu:
         model = torch.nn.DataParallel(model)
     model.to(opt.device)
-    criterion = dlfh_loss.DLFHLoss(opt.eta)
+    criterion = dlfh_loss.DPSHLoss(opt.eta)
 
     # 不知道为什么，加momentum无法收敛！！！
     # 不知道为什么，SGD不用zeros初始化U无法收敛！！！
@@ -108,7 +108,7 @@ def dpsh(opt,
     if opt.dataset == 'cifar10':
         database_labels = torch.FloatTensor(encode_onehot(database_dataloader.dataset.targets)).to(opt.device)
     elif opt.dataset == 'nus-wide':
-        database_labels = torch.FloatTensor(database_dataloader.dataset.tags).to(opt.device)
+        database_labels = torch.FloatTensor(database_dataloader.dataset.targets).to(opt.device)
     final_map = evaluate(model,
                          query_dataloader,
                          database_labels,
@@ -154,7 +154,7 @@ def evaluate(model,
     if opt.dataset == 'cifar10':
         query_labels = torch.FloatTensor(encode_onehot(query_dataloader.dataset.targets)).to(opt.device)
     elif opt.dataset == 'nus-wide':
-        query_labels = torch.FloatTensor(query_dataloader.dataset.tags).to(opt.device)
+        query_labels = torch.FloatTensor(query_dataloader.dataset.targets).to(opt.device)
 
     # 计算map
     meanAP = calc_map(query_code,

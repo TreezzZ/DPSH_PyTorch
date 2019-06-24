@@ -30,6 +30,7 @@ def load_data(opt):
                                   num_workers=opt.num_workers,
                                   )
     train_dataloader = DataLoader(train_dataset,
+                                  shuffle=True,
                                   batch_size=opt.batch_size,
                                   num_workers=opt.num_workers,
                                   )
@@ -46,7 +47,23 @@ class NUS_WIDE(Dataset):
     def init(path, num_query, num_train):
         # load data, tags
         NUS_WIDE.ALL_IMG = np.load(os.path.join(path, 'nus-wide-21-img.npy'))
-        NUS_WIDE.ALL_TAGS = np.load(os.path.join(path, 'nus-wide-21-tag.npy'))
+        NUS_WIDE.ALL_TARGETS = np.load(os.path.join(path, 'nus-wide-21-tag.npy')).astype(np.float32)
+        NUS_WIDE.ALL_IMG = NUS_WIDE.ALL_IMG.transpose((0, 2, 3, 1))
+
+        # 打算平衡采样，每类都采样一些，可是内存大小不够
+        # split data, tags
+        # query_per_class = num_query // 21
+        # train_per_class = num_train // 21
+        # for i in range(21):
+        #     non_zero_index = np.asarray(np.where(NUS_WIDE.ALL_TAGS[:, i] == 1))
+        #     non_zero_index = non_zero_index[np.random.permutation(non_zero_index.shape[0])]
+        #     if not i:
+        #         query_index = non_zero_index[:query_per_class]
+        #         train_index = non_zero_index[query_per_class: query_per_class + train_per_class]
+        #     else:
+        #         query_index = np.hstack((query_index, non_zero_index[:query_per_class]))
+        #         train_index = np.hstack(
+        #             (train_index, non_zero_index[query_per_class: query_per_class + train_per_class]))
 
         # split data, tags
         perm_index = np.random.permutation(NUS_WIDE.ALL_IMG.shape[0])
@@ -54,23 +71,23 @@ class NUS_WIDE(Dataset):
         train_index = perm_index[:num_train]
 
         NUS_WIDE.QUERY_IMG = NUS_WIDE.ALL_IMG[query_index, :]
-        NUS_WIDE.QUERY_TAGS = NUS_WIDE.ALL_TAGS[query_index, :]
+        NUS_WIDE.QUERY_TARGETS = NUS_WIDE.ALL_TARGETS[query_index, :]
         NUS_WIDE.TRAIN_IMG = NUS_WIDE.ALL_IMG[train_index, :]
-        NUS_WIDE.TRAIN_TAGS = NUS_WIDE.ALL_TAGS[train_index, :]
+        NUS_WIDE.TRAIN_TARGETS = NUS_WIDE.ALL_TARGETS[train_index, :]
 
-    def __init__(self, mode, transform=None, targets_transform=None):
+    def __init__(self, mode, transform=None, target_transform=None):
         self.transform = transform
-        self.targets_transform = targets_transform
+        self.target_transform = target_transform
 
         if mode == 'train':
             self.img = NUS_WIDE.TRAIN_IMG
-            self.tags = NUS_WIDE.TRAIN_TAGS
+            self.targets = NUS_WIDE.TRAIN_TARGETS
         elif mode == 'query':
             self.img = NUS_WIDE.QUERY_IMG
-            self.tags = NUS_WIDE.QUERY_TAGS
+            self.targets = NUS_WIDE.QUERY_TARGETS
         else:
             self.img = NUS_WIDE.ALL_IMG
-            self.tags = NUS_WIDE.ALL_TAGS
+            self.targets = NUS_WIDE.ALL_TARGETS
 
     def __getitem__(self, index):
         img, target = self.img[index], self.targets[index]
