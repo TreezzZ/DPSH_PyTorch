@@ -41,10 +41,21 @@ optional arguments:
   --gpu GPU             use gpu(default: 0. -1: use cpu)
   --lr LR               learning rate(default: 1e-5)
   --batch-size BATCH_SIZE
-                        batch size(default: 64)
-  --epochs EPOCHS       epochs(default:64)
+                        batch size(default: 512)
+  --epochs EPOCHS       epochs(default:150)
   --num-workers NUM_WORKERS
-                        number of workers(default: 4)
+                        number of workers(default: 0)
   --eta ETA             hyper-parameter: regularization term (default: 10)
 
 ```
+
+# Experiments
+cifar10-5000: 1000 query images, 5000 training images.
+
+nus-wide: 2100 query images, 10500 training images.
+
+计算top 5000 mAP，跑3次，取平均
+
+ bits | 12 | 24 | 32 | 48  
+   :-:   |  :-:    |   :-:   |   :-:   |   :-:     
+cifar10-5000 mAP | 0.7277 | 0.7649 | 0.7550 | 0.7684

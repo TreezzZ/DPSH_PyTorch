@@ -66,12 +66,12 @@ def load_parse():
                         help='use gpu(default: 0. -1: use cpu)')
     parser.add_argument('--lr', default=1e-5, type=float,
                         help='learning rate(default: 1e-5)')
-    parser.add_argument('--batch-size', default=64, type=int,
-                        help='batch size(default: 64)')
-    parser.add_argument('--epochs', default=50, type=int,
-                        help='epochs(default:64)')
-    parser.add_argument('--num-workers', default=4, type=int,
-                        help='number of workers(default: 4)')
+    parser.add_argument('--batch-size', default=512, type=int,
+                        help='batch size(default: 512)')
+    parser.add_argument('--epochs', default=150, type=int,
+                        help='epochs(default:150)')
+    parser.add_argument('--num-workers', default=0, type=int,
+                        help='number of workers(default: 0)')
     parser.add_argument('--eta', default=10, type=float,
                         help='hyper-parameter: regularization term (default: 10)')
 
