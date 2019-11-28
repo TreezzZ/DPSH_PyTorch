@@ -33,6 +33,7 @@ def run():
 
     # Training
     for code_length in args.code_length:
+        logger.info('[code_length:{}]'.format(code_length))
         checkpoint = dpsh.train(
             train_dataloader,
             query_dataloader,

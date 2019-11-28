@@ -106,7 +106,7 @@ def train(
                     'model': model.state_dict(),
                     'map': best_map,
                 }
-            logger.debug('[iter:{}/{}][loss:{:.2f}][map:{:.4f}][time:{:.2f}]'.format(
+            logger.info('[iter:{}/{}][loss:{:.2f}][map:{:.4f}][time:{:.2f}]'.format(
                 it+1,
                 max_iter,
                 running_loss,
