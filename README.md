@@ -1,55 +1,50 @@
 # Feature Learning based Deep Supervised Hashing with Pairwise Labels
 
-论文[Feature Learning based Deep Supervised Hashing with Pairwise Labels](http://202.119.32.195/cache/1/03/cs.nju.edu.cn/01c07b4c0cb0161455ace83be60f9ffc/IJCAI16_DPSH.pdf)
-
-## Requirements
-1. pytorch 1.1
+## REQUIREMENTS
+1. pytorch
 2. loguru
+`pip install -r requirements.txt`
 
-## 数据集下载
+## DATASETS
 1. [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html)
-2. [NUS-WIDE](https://pan.baidu.com/s/1S1ZsYCEfbH5eQguHs8yG_w)
-密码：4839
+2. [NUS-WIDE](https://pan.baidu.com/s/1f9mKXE2T8XpIq8p7y8Fa6Q) Password: uhr3
 
-## 运行
-`python run.py --dataset cifar10 --data-path <data_path> --code-length 64 `
-
-日志记录在`logs`文件夹内
-
-生成的hash code保存在`result`文件夹内，Tensor形式保存
-
-## 参数说明
+## USAGE
 ```
+usage: run.py [-h] [--dataset DATASET] [--root ROOT] [--num-query NUM_QUERY]
+              [--arch ARCH] [--num-train NUM_TRAIN]
+              [--code-length CODE_LENGTH] [--topk TOPK] [--gpu GPU] [--lr LR]
+              [--batch-size BATCH_SIZE] [--max-iter MAX_ITER]
+              [--num-workers NUM_WORKERS]
+              [--evaluate-interval EVALUATE_INTERVAL] [--eta ETA]
+
 DPSH_PyTorch
 
 optional arguments:
   -h, --help            show this help message and exit
-  --dataset DATASET     dataset used to train (default: cifar10)
-  --data-path DATA_PATH
-                        path of cifar10 dataset
+  --dataset DATASET     Dataset name.
+  --root ROOT           Path of dataset
   --num-query NUM_QUERY
-                        number of query(default: 1000)
+                        Number of query data points.(default: 1000)
+  --arch ARCH           CNN model name.(default: alexnet)
   --num-train NUM_TRAIN
-                        number of train(default: 5000)
+                        Number of training data points.(default: 5000)
   --code-length CODE_LENGTH
-                        hyper-parameter: binary hash code length (default: 12)
-  --topk TOPK           compute map of top k (default: 5000)
-  --evaluate-freq EVALUATE_FREQ
-                        frequency of evaluate (default: 10)
-  --model MODEL         CNN model(default: alexnet)
-  --multi-gpu           use multiple gpu
-  --gpu GPU             use gpu(default: 0. -1: use cpu)
+                        Binary hash code length.(default: 16,32,48,64)
+  --topk TOPK           Calculate map of top k.(default: all)
+  --gpu GPU             Using gpu.(default: False)
   --lr LR               learning rate(default: 1e-5)
   --batch-size BATCH_SIZE
                         batch size(default: 512)
-  --epochs EPOCHS       epochs(default:150)
+  --max-iter MAX_ITER   Number of iterations.(default: 150)
   --num-workers NUM_WORKERS
-                        number of workers(default: 0)
-  --eta ETA             hyper-parameter: regularization term (default: 10)
-
+                        Number of loading data threads.(default: 6)
+  --evaluate-interval EVALUATE_INTERVAL
+                        Evaluation interval(default: 10)
+  --eta ETA             Hyper-parameter.(default: 10)
 ```
 
-# Experiments
+## Experiments
 cifar10-5000: 1000 query images, 5000 training images.
 
 nus-wide: 2100 query images, 10500 training images.
