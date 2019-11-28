@@ -81,14 +81,14 @@ def load_config():
                         help='learning rate(default: 1e-5)')
     parser.add_argument('--batch-size', default=512, type=int,
                         help='batch size(default: 512)')
-    parser.add_argument('--max-iter', default=150, type=int,
-                        help='Number of iterations.(default: 150)')
+    parser.add_argument('--max-iter', default=100, type=int,
+                        help='Number of iterations.(default: 100)')
     parser.add_argument('--num-workers', default=6, type=int,
                         help='Number of loading data threads.(default: 6)')
     parser.add_argument('--evaluate-interval', default=10, type=int,
                         help='Evaluation interval(default: 10)')
-    parser.add_argument('--eta', default=10, type=float,
-                        help='Hyper-parameter.(default: 10)')
+    parser.add_argument('--eta', default=0.1, type=float,
+                        help='Hyper-parameter.(default: 0.1)')
 
     args = parser.parse_args()
 

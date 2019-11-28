@@ -37,12 +37,12 @@ optional arguments:
   --lr LR               learning rate(default: 1e-5)
   --batch-size BATCH_SIZE
                         batch size(default: 512)
-  --max-iter MAX_ITER   Number of iterations.(default: 150)
+  --max-iter MAX_ITER   Number of iterations.(default: 100)
   --num-workers NUM_WORKERS
                         Number of loading data threads.(default: 6)
   --evaluate-interval EVALUATE_INTERVAL
                         Evaluation interval(default: 10)
-  --eta ETA             Hyper-parameter.(default: 10)
+  --eta ETA             Hyper-parameter.(default: 0.1)
 ```
 
 ## Experiments
