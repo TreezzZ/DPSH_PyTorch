@@ -3,6 +3,7 @@
 ## REQUIREMENTS
 1. pytorch
 2. loguru
+
 `pip install -r requirements.txt`
 
 ## DATASETS
