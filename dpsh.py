@@ -60,7 +60,6 @@ def train(
     for it in range(max_iter):
         model.train()
         running_loss = 0.
-        iter_time = time.time()
         for data, targets, index in train_dataloader:
             data, targets = data.to(device), targets.to(device)
             optimizer.zero_grad()
