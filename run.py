@@ -72,18 +72,18 @@ def load_config():
                         help='CNN model name.(default: alexnet)')
     parser.add_argument('--num-train', default=5000, type=int,
                         help='Number of training data points.(default: 5000)')
-    parser.add_argument('--code-length', default='16,32,48,64', type=str,
-                        help='Binary hash code length.(default: 16,32,48,64)')
+    parser.add_argument('--code-length', default='12,24,32,48', type=str,
+                        help='Binary hash code length.(default: 12,24,32,48)')
     parser.add_argument('--topk', default=-1, type=int,
                         help='Calculate map of top k.(default: all)')
     parser.add_argument('--gpu', default=None, type=int,
                         help='Using gpu.(default: False)')
     parser.add_argument('--lr', default=1e-5, type=float,
                         help='learning rate(default: 1e-5)')
-    parser.add_argument('--batch-size', default=512, type=int,
-                        help='batch size(default: 512)')
-    parser.add_argument('--max-iter', default=100, type=int,
-                        help='Number of iterations.(default: 100)')
+    parser.add_argument('--batch-size', default=128, type=int,
+                        help='batch size(default: 128)')
+    parser.add_argument('--max-iter', default=150, type=int,
+                        help='Number of iterations.(default: 150)')
     parser.add_argument('--num-workers', default=6, type=int,
                         help='Number of loading data threads.(default: 6)')
     parser.add_argument('--evaluate-interval', default=10, type=int,

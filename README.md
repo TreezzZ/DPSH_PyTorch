@@ -31,13 +31,13 @@ optional arguments:
   --num-train NUM_TRAIN
                         Number of training data points.(default: 5000)
   --code-length CODE_LENGTH
-                        Binary hash code length.(default: 16,32,48,64)
+                        Binary hash code length.(default: 12,24,32,48)
   --topk TOPK           Calculate map of top k.(default: all)
   --gpu GPU             Using gpu.(default: False)
   --lr LR               learning rate(default: 1e-5)
   --batch-size BATCH_SIZE
-                        batch size(default: 512)
-  --max-iter MAX_ITER   Number of iterations.(default: 100)
+                        batch size(default: 128)
+  --max-iter MAX_ITER   Number of iterations.(default: 150)
   --num-workers NUM_WORKERS
                         Number of loading data threads.(default: 6)
   --evaluate-interval EVALUATE_INTERVAL
@@ -46,12 +46,13 @@ optional arguments:
 ```
 
 ## Experiments
-cifar10-5000: 1000 query images, 5000 training images.
+CNN model: Alexnet. Compute mean average precision(MAP).
 
-nus-wide: 2100 query images, 10500 training images.
+cifar10: 1000 query images, 5000 training images.
 
-计算top 5000 mAP，跑3次，取平均
+nus-wide-tc21: 21 classes, 2100 query images, 10500 training images.
 
  bits | 12 | 24 | 32 | 48  
    :-:   |  :-:    |   :-:   |   :-:   |   :-:     
-cifar10-5000 mAP | 0.7277 | 0.7649 | 0.7550 | 0.7684
+cifar10@ALL | 0.6676 | 0.7118 | 0.7362 | 0.7487
+nus-wide-tc21@5000 | 0.7945 | 0.8239 | 0.8270 | 0.8364
