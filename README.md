@@ -46,7 +46,7 @@ optional arguments:
   --eta ETA             Hyper-parameter.(default: 0.1)
 ```
 
-## Experiments
+## EXPERIMENTS
 CNN model: Alexnet. Compute mean average precision(MAP).
 
 cifar10: 1000 query images, 5000 training images.
