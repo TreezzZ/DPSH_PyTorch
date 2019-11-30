@@ -1,2 +1,3 @@
-pytorch
+torch
+torchvision
 loguru
