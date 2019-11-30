@@ -9,6 +9,7 @@
 ## DATASETS
 1. [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html)
 2. [NUS-WIDE](https://pan.baidu.com/s/1f9mKXE2T8XpIq8p7y8Fa6Q) Password: uhr3
+3. [Imagenet100](https://pan.baidu.com/s/1Vihhd2hJ4q0FOiltPA-8_Q) Password: ynwf
 
 ## USAGE
 ```
@@ -52,7 +53,10 @@ cifar10: 1000 query images, 5000 training images.
 
 nus-wide-tc21: 21 classes, 2100 query images, 10500 training images.
 
- bits | 12 | 24 | 32 | 48  
-   :-:   |  :-:    |   :-:   |   :-:   |   :-:     
-cifar10@ALL | 0.6676 | 0.7118 | 0.7362 | 0.7487
-nus-wide-tc21@5000 | 0.8091 | 0.8346 | 0.8403 | 0.8450
+imagenet100: 100 classes, 5000 query images, 10000 training images.
+
+ bits | 12 | 16 | 24 | 32 | 48 | 64 | 128
+   :-:   |  :-:    |   :-:   |   :-:   |   :-:   |   :-:   |   :-:   |   :-:     
+cifar10@ALL | 0.6676 | 0.7131 | 0.7118 | 0.7362 | 0.7487 | 0.7542 | 0.7565
+nus-wide-tc21@5000 | 0.8091 | 0.8188 | 0.8346 | 0.8403 | 0.8450 | 0.8503 |0.8588
+imagenet100@1000 | 0.1985 | 0.2497 | 0.3654 | 0.4147 | 0.4612 | 0.4950 | 0.5687

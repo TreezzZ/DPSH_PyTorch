@@ -9,7 +9,7 @@ from data.data_loader import load_data
 
 def run():
     args = load_config()
-    logger.add(os.path.join('logs', '{}_model_{}_codelength_{}_query_{}_train_{}_topk_{}_eta_{}.log'.format(
+    logger.add(os.path.join('logs', '{}_model_{}_code_{}_query_{}_train_{}_topk_{}_eta_{}.log'.format(
         args.dataset,
         args.arch,
         ','.join([str(c) for c in args.code_length]),
@@ -47,7 +47,7 @@ def run():
             args.topk,
             args.evaluate_interval,
         )
-        torch.save(checkpoint, os.path.join('checkpoints', '{}_model_{}_codelength_{}_query_{}_train_{}_topk_{}_eta_{}.pt'.format(args.dataset, args.arch, code_length, args.num_query, args.num_train, args.topk, args.eta)))
+        torch.save(checkpoint, os.path.join('checkpoints', '{}_model_{}_code_{}_query_{}_train_{}_topk_{}_eta_{}_map_{:.4f}.pt'.format(args.dataset, args.arch, code_length, args.num_query, args.num_train, args.topk, args.eta, checkpoint['map'])))
         logger.info('[code_length:{}][map:{:.4f}]'.format(code_length, checkpoint['map']))
 
 

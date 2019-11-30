@@ -1,5 +1,6 @@
 import data.cifar10 as cifar10
 import data.nus_wide as nuswide
+import data.imagenet as imagenet
 
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -32,8 +33,13 @@ def load_data(dataset, root, num_query, num_train, batch_size, num_workers):
                                                                                      num_query,
                                                                                      num_train,
                                                                                      batch_size,
-                                                                                     num_workers
+                                                                                     num_workers,
                                                                                      )
+    elif dataset == 'imagenet':
+        train_dataloader, query_dataloader, retrieval_dataloader = imagenet.load_data(root, 
+                                                                                      batch_size, 
+                                                                                      num_workers,
+                                                                                      )
     else:
         raise ValueError("Invalid dataset name!")
 
